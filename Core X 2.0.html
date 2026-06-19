@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Core X #1 — Undertale ver.</title>
+
+  <!-- Press Start 2P (픽셀 폰트) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- 배경 별 반짝이 (모든 화면 공통) -->
+  <canvas id="bg-stars"></canvas>
+
+  <!-- ======================================================== -->
+  <!-- ① 타이틀 화면                                            -->
+  <!-- ======================================================== -->
+  <section class="screen active" id="screen-title">
+    <div class="title-wrap">
+      <div class="title-heart">❤</div>
+      <h1 class="title-main">CORE&nbsp;X<span class="title-sharp">#1</span></h1>
+      <p class="title-sub">— Undertale ver. —</p>
+      <p class="title-tag">Frisk와 함께 Asriel을 구하라</p>
+
+      <div class="title-buttons">
+        <button class="btn btn-primary" data-goto="mode-select">PRESS START</button>
+      </div>
+
+      <p class="title-credit">v0.1 · 4-Player Board Game</p>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- ② 모드 선택 (온라인 / 로컬)                              -->
+  <!-- ======================================================== -->
+  <section class="screen" id="screen-mode-select">
+    <div class="panel">
+      <h2 class="panel-title">MODE</h2>
+      <div class="mode-cards">
+        <button class="mode-card" data-mode="online">
+          <span class="mode-icon">🌐</span>
+          <span class="mode-name">ONLINE</span>
+          <span class="mode-desc">4명이 인터넷으로<br/>실시간 플레이</span>
+        </button>
+        <button class="mode-card" data-mode="local">
+          <span class="mode-icon">🎮</span>
+          <span class="mode-name">LOCAL</span>
+          <span class="mode-desc">같은 기기에서<br/>4명 핫시트</span>
+        </button>
+      </div>
+      <button class="btn btn-ghost" data-goto="title">◀ BACK</button>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- ③ 온라인 - 방 만들기/참가                                -->
+  <!-- ======================================================== -->
+  <section class="screen" id="screen-online-entry">
+    <div class="panel">
+      <h2 class="panel-title">ONLINE</h2>
+
+      <div class="form-group">
+        <label class="form-label">닉네임</label>
+        <input class="form-input" id="online-name" type="text" maxlength="10" placeholder="Frisk" />
+      </div>
+
+      <div class="online-actions">
+        <button class="btn btn-primary" id="btn-create-room">방 만들기</button>
+        <div class="join-row">
+          <input class="form-input form-input--code" id="online-code" type="text" maxlength="4" placeholder="CODE" />
+          <button class="btn btn-secondary" id="btn-join-room">참가</button>
+        </div>
+      </div>
+
+      <p class="form-hint" id="online-msg"></p>
+      <button class="btn btn-ghost" data-goto="mode-select">◀ BACK</button>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- ④ 온라인 - 대기실                                        -->
+  <!-- ======================================================== -->
+  <section class="screen" id="screen-lobby">
+    <div class="panel panel-wide">
+      <h2 class="panel-title">LOBBY</h2>
+      <p class="lobby-code">ROOM&nbsp;CODE&nbsp;:&nbsp;<span id="lobby-code-display">----</span></p>
+
+      <div class="lobby-players" id="lobby-players">
+        <!-- JS로 채움 -->
+      </div>
+
+      <p class="form-hint" id="lobby-msg">4명이 모이면 자동으로 시작합니다.</p>
+      <button class="btn btn-ghost" id="btn-leave-lobby">◀ 나가기</button>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- ⑤ 캐릭터(진영) 선택                                      -->
+  <!-- ======================================================== -->
+  <section class="screen" id="screen-char-select">
+    <div class="panel panel-wide">
+      <h2 class="panel-title">SELECT YOUR FACTION</h2>
+
+      <div class="char-grid" id="char-grid">
+        <!-- JS로 4개 캐릭터 카드 생성 -->
+      </div>
+
+      <p class="form-hint" id="char-msg"></p>
+      <button class="btn btn-primary" id="btn-start-game" disabled>START</button>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- ⑥ 인게임                                                  -->
+  <!-- ======================================================== -->
+  <section class="screen screen-game" id="screen-game">
+
+    <!-- 좌측: 현재 플레이어 소지품 -->
+    <aside class="hud hud-left" id="hud-inventory">
+      <h3 class="hud-title">INVENTORY</h3>
+      <div class="inv-slots" id="inv-slots">
+        <!-- 8칸 -->
+      </div>
+      <h3 class="hud-title hud-title--sub">BOX <span class="hud-hint">(자기 진영)</span></h3>
+      <div class="inv-slots inv-slots--box" id="box-slots">
+        <!-- 8칸 -->
+      </div>
+    </aside>
+
+    <!-- 중앙: 보드 -->
+    <main class="board-wrap">
+      <canvas id="board-canvas"></canvas>
+      <div class="board-overlay" id="board-overlay">
+        <p class="board-placeholder">⚙ 보드 로직 구현 대기 중 (Q1~Q3 확정 후)</p>
+      </div>
+    </main>
+
+    <!-- 우측: 플레이어 정보 / To-do -->
+    <aside class="hud hud-right">
+      <div class="player-info" id="player-info">
+        <!-- JS로 채움 -->
+      </div>
+      <h3 class="hud-title">TO-DO</h3>
+      <ul class="todo-list" id="todo-list"></ul>
+      <h3 class="hud-title hud-title--gold">GOLD</h3>
+      <div class="gold-display" id="gold-display">0<span class="gold-unit">G</span></div>
+      <div class="players-scoreboard" id="players-scoreboard"></div>
+    </aside>
+
+    <!-- 하단 액션바 -->
+    <footer class="action-bar">
+      <div class="turn-info">
+        <span class="turn-label">현재 차례</span>
+        <span class="turn-player" id="turn-player">-</span>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-action" id="act-move" disabled>이동</button>
+        <button class="btn btn-action" id="act-pickup" disabled>줍기</button>
+        <button class="btn btn-action" id="act-upgrade" disabled>업그레이드</button>
+        <button class="btn btn-action" id="act-replace" disabled>교체</button>
+        <button class="btn btn-action btn-joker" id="act-joker" disabled>조커</button>
+        <button class="btn btn-action btn-end" id="act-end-turn" disabled>턴 종료</button>
+      </div>
+
+      <div class="round-info">
+        <span class="round-label">ROUND</span>
+        <span class="round-num" id="round-num">1</span>
+      </div>
+    </footer>
+
+    <!-- 로그 (오른쪽 하단 토스트) -->
+    <div class="log-toasts" id="log-toasts"></div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- ⑦ 결과 화면                                              -->
+  <!-- ======================================================== -->
+  <section class="screen" id="screen-result">
+    <div class="panel panel-wide">
+      <h2 class="panel-title" id="result-title">VICTORY</h2>
+      <div class="result-asriel" id="result-asriel">🌟</div>
+      <ol class="leaderboard" id="leaderboard"></ol>
+      <button class="btn btn-primary" data-goto="title">메인으로</button>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 공용 모달                                                 -->
+  <!-- ======================================================== -->
+  <div class="modal-backdrop" id="modal-backdrop" hidden>
+    <div class="modal" id="modal">
+      <h3 class="modal-title" id="modal-title">알림</h3>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-buttons" id="modal-buttons"></div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- Firebase SDK (compat 버전, 모듈 없이 사용)               -->
+  <!-- ======================================================== -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+  <!-- 게임 스크립트 -->
+  <script src="js/sprites.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/online.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
